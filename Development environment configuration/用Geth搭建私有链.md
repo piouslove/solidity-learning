@@ -42,3 +42,28 @@ $ geth init path/to/genesis.json
 事实上目前工作完成之后已经可以满足我们的需求了，只要你在`alloc`字段足够多的账户和资金来保证合约代码可以正常测试就可以了。  
 剩下的挖矿、合约部署和状态账本等问题我们可以靠官方提供的JS库`web3.js`来解决，后边章节会介绍。  
 但是，Geth也可以解决上句话所说的问题，它还可以帮我们搭建一个多个节点的私有链。如果你有兴趣，请往下看。
+## 创建会合点（引导节点）
+若想将你所有想要运行的节点初始化为创世状态，则需要启动一个可以用来使节点在你的网络中或互联网中互相发现的引导节点。  
+也就是说，你需要一个引导节点来使你的私有链节点互相通信且同步私有链区块。最简单的方法是配置和运行专用的引导节点`bootnode`：  
+```
+$ bootnode --genkey=boot.key
+$ bootnode --nodekey=boot.key
+```
+随着bootnode在线，它将显示一个其他节点可以用来连接到它并交换对等信息的 [`enode URL`](https://github.com/ethereum/wiki/wiki/enode-url-format) 。  
+确保将显示的IP地址信息（最可能是`[::]`）替换为外部可访问的IP，以获取实际的 `enode URL`。  
+注意：也可以使用一个完整的Geth全节点作为引导节点，但不太推荐这种方法。
+## 启动其他节点
+完成上面的步骤之后，可以用`telnet <ip> <port>`来确保引导节点`bootnode`可以被访问。  
+在创建其他Geth节点加入你的私有链时，你可以通过`--bootnodes`来指定引导节点使你要创建的Geth节点可以发现其他节点并进行通信然后同步区块。
+当你在同一台电脑上创建多个节点时，要注意数据位置不要相同。`--datadir`可以用来指定数据存储目录，也就是区块存储目录。
+```
+$ geth --datadir=path/to/custom/data/folder --bootnodes=<bootnode-enode-url-from-above>
+```
+注意：由于私有链网络将完全切断主网络和测试网络，现在还需要配置一个矿工来处理交易并创建新区块。
+## 创建一个私有链矿工
+公有链挖矿消耗巨大，通常需要GPU才能满足算力要求，不过对于私有链，CPU单线程就可以挖矿了：
+```
+$ geth <usual-flags> --mine --minerthreads=1 --etherbase=0x0000000000000000000000000000000000000000
+```
+其中，`--minerthreads`指定线程数，`--etherbase`是矿工账户，也就是矿工收益的收钱地址。  
+也可以通过`--gasprice`和`--targetgaslimit`来设定`gas`的相关限制。
