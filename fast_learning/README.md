@@ -198,3 +198,12 @@ contract C {
     }
 }
 ```
+
+## `bytes` 和 `byte[]` 有什么不同?
+bytes is usually more efficient: When used as arguments to functions (i.e. in CALLDATA) or in memory, every single element of a byte[] is padded to 32 bytes which wastes 31 bytes per element.
+ `bytes` 通常更有效：当用作函数的参数（即在CALLDATA）或 `momery` 中时，元素的每个 `byte[]` 被填充到32个字节，这样的话每个元素浪费了31个字节。
+
+## Is it possible to send a value while calling an overloaded function?
+It’s a known missing feature. https://www.pivotaltracker.com/story/show/92020468 as part of https://www.pivotaltracker.com/n/projects/1189488
+
+Best solution currently see is to introduce a special case for gas and value and just re-check whether they are present at the point of overload resolution.
